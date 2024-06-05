@@ -37,9 +37,7 @@ pipeline {
                 dir("${WORKSPACE}/${env.BUILD_ID}") {
                     unstash 'compiled-results'
                     // Confirm files are in place
-                    sh "ls ${WORKSPACE}/${env.BUILD_ID}/sources"
-                    // Check files inside the container
-                    sh "docker run --platform linux/amd64 --rm -v ${VOLUME} ${IMAGE} ls /src"
+                    sh "ls /src"
                     // Run pyinstaller with correct paths
                     sh "docker run --platform linux/amd64 --rm -v ${VOLUME} ${IMAGE} pyinstaller -F /src/prog.py"
                 }
