@@ -49,6 +49,7 @@ pipeline {
             agent any
             steps {
                 echo 'echo main'
+                echo 'trigering webhook'
             }
         }
     }
