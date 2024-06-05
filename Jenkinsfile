@@ -30,19 +30,23 @@ pipeline {
         stage('Deliver') {
             agent any
             environment {
-                VOLUME = '$(pwd)/sources:/src'
+                VOLUME = "${WORKSPACE}/sources:/src"
                 IMAGE = 'cdrx/pyinstaller-linux'
             }
             steps {
-                dir(path: env.BUILD_ID) {
-                    unstash(name: 'compiled-results')
-                    sh "docker run --rm -v ${VOLUME} ${IMAGE} 'pyinstaller -F prog.py'"
+                dir("${WORKSPACE}/${env.BUILD_ID}") {
+                    unstash 'compiled-results'
+                    sh "docker run --rm -v ${VOLUME} ${IMAGE} pyinstaller -F /src/prog.py"
                 }
             }
             post {
                 success {
-                    archiveArtifacts "${env.BUILD_ID}/sources/dist/prog"
-                    sh "rm -rf ${env.BUILD_ID}/sources/build ${env.BUILD_ID}/sources/dist"
+                    archiveArtifacts artifacts: "${WORKSPACE}/${env.BUILD_ID}/sources/dist/prog", allowEmptyArchive: true
+                    sh '''
+                        chmod -R u+rwx ${WORKSPACE}/${env.BUILD_ID}/sources/build
+                        chmod -R u+rwx ${WORKSPACE}/${env.BUILD_ID}/sources/dist
+                        rm -rf ${WORKSPACE}/${env.BUILD_ID}/sources/build ${WORKSPACE}/${env.BUILD_ID}/sources/dist
+                    '''
                 }
             }
         }
